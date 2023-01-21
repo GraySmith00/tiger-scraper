@@ -11,42 +11,15 @@ const main = async () => {
       userAgent:
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36',
     });
-
-    await page.goto(
-      'https://greenskeeper.org/colorado/Denver_North_Boulder_Fort_Collins/coal_creek_golf_course/'
-    );
-    await page.waitForLoadState();
-
-    const scorecardLink = page.locator('a', {
-      hasText: ' Scorecard (Yes)',
+    const data = await getScorecard({
+      page,
+      url: 'https://greenskeeper.org/colorado/Denver_North_Boulder_Fort_Collins/coal_creek_golf_course/',
     });
-
-    await scorecardLink.click();
-    await page.waitForLoadState();
-
-    const frontRows = await page
-      .locator('#gcscorecard table:nth-child(3) tbody tr td')
-      .allInnerTexts();
-    const frontData = cleanData(frontRows);
-
-    const backRows = await page
-      .locator('#gcscorecard table:nth-child(4) tbody tr td')
-      .allInnerTexts();
-
-    const backData = cleanData(backRows, true);
-
-    const data = { ...frontData, ...backData };
 
     console.log('data', data);
   } catch (error) {
     console.log('error', error);
   }
-
-  // getScorecard({
-  //   page,
-
-  //   url: 'https://greenskeeper.org/colorado/Denver_North_Boulder_Fort_Collins/coal_creek_golf_course/',
-  // });
 
   // await page.goto('https://greenskeeper.org/colorado/golf_courses');
   // await page.waitForLoadState();
@@ -130,9 +103,32 @@ const cleanData = (arr, backNine) => {
   return data;
 };
 
-// const getScorecard = ({ page, url }) => {
-//   await page.
-// };
+const getScorecard = async ({ page, url }) => {
+  await page.goto(url);
+  await page.waitForLoadState();
+
+  const scorecardLink = page.locator('a', {
+    hasText: ' Scorecard (Yes)',
+  });
+
+  await scorecardLink.click();
+  await page.waitForLoadState();
+
+  const frontRows = await page
+    .locator('#gcscorecard table:nth-child(3) tbody tr td')
+    .allInnerTexts();
+  const frontData = cleanData(frontRows);
+
+  const backRows = await page
+    .locator('#gcscorecard table:nth-child(4) tbody tr td')
+    .allInnerTexts();
+
+  const backData = cleanData(backRows, true);
+
+  const data = { ...frontData, ...backData };
+
+  return data;
+};
 
 // const checkTiger = async (page) => {
 //   await page.waitForTimeout(3000);
