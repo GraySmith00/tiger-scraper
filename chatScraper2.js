@@ -1,13 +1,13 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
+const { chromium } = require("playwright");
+const fs = require("fs");
 
 const getScoreCards = async (page) => {
   // Wait for the page to load
-  await page.waitForSelector('.groupList > div > div > a');
+  await page.waitForSelector(".groupList > div > div > a");
 
   // Extract the score card URLs from the page
   const scoreCardUrls = await page.$$eval(
-    '.groupList > div > div > a',
+    ".groupList > div > div > a",
     (links) => links.map((link) => link.href)
   );
 
@@ -77,36 +77,36 @@ const cleanData = (arr, backNine) => {
 };
 
 const getScorecard = async ({ page, url }) => {
-  console.log('url', url);
+  console.log("url", url);
   try {
     await page.goto(url);
     await page.waitForLoadState();
 
     // Get name
     const name = await page
-      .$eval('#gcheader-i > div > div > p', (el) => el.textContent)
+      .$eval("#gcheader-i > div > div > p", (el) => el.textContent)
       .catch((error) => {
-        console.log('error', error);
-        return '';
+        console.log("error", error);
+        return "";
       });
 
     // Get city, state, zip, phone
     const addPhoneCombo = await page
-      .$eval('.address > p', (el) => el.innerHTML)
+      .$eval(".address > p", (el) => el.innerHTML)
       .catch((error) => {
-        console.log('error', error);
-        return '';
+        console.log("error", error);
+        return "";
       });
-    const [city, stateZip] = addPhoneCombo.split('<br>')[1].split(',');
-    const [state, zip] = stateZip.trim().split(' ');
-    const phone = addPhoneCombo.split(' •	')[1];
+    const [city, stateZip] = addPhoneCombo.split("<br>")[1].split(",");
+    const [state, zip] = stateZip.trim().split(" ");
+    const phone = addPhoneCombo.split(" •	")[1];
 
     // Get website
     const website = await page
-      .$eval('.local-links a', (el) => el.href)
+      .$eval(".local-links a", (el) => el.href)
       .catch((error) => {
-        console.log('error', error);
-        return '';
+        console.log("error", error);
+        return "";
       });
 
     // Find scorecard link
@@ -114,12 +114,12 @@ const getScorecard = async ({ page, url }) => {
     const linkText = await page
       .$eval("a[href*='scorecard.cfm']", (el) => el.textContent)
       .catch((error) => {
-        console.log('error', error);
-        return '';
+        console.log("error", error);
+        return "";
       });
 
     // Check if course has scrorecard
-    if (linkText.trim() !== 'Scorecard (Yes)') {
+    if (linkText.trim() !== "Scorecard (Yes)") {
       return {
         name,
         phone,
@@ -132,20 +132,20 @@ const getScorecard = async ({ page, url }) => {
     }
 
     // If has scorecard, get link el
-    const scorecardLink = page.locator('a', {
-      hasText: ' Scorecard (Yes)',
+    const scorecardLink = page.locator("a", {
+      hasText: " Scorecard (Yes)",
     });
 
     await scorecardLink.click();
     await page.waitForLoadState();
 
     const frontRows = await page
-      .locator('#gcscorecard table:nth-child(3) tbody tr td')
+      .locator("#gcscorecard table:nth-child(3) tbody tr td")
       .allInnerTexts();
     const frontData = cleanData(frontRows);
 
     const backRows = await page
-      .locator('#gcscorecard table:nth-child(4) tbody tr td')
+      .locator("#gcscorecard table:nth-child(4) tbody tr td")
       .allInnerTexts();
 
     const backData = cleanData(backRows, true);
@@ -164,34 +164,34 @@ const getScorecard = async ({ page, url }) => {
 
     return scorecard;
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error);
     return {
-      name: '',
-      phone: '',
-      city: '',
-      state: '',
-      zip: '',
-      website: '',
+      name: "",
+      phone: "",
+      city: "",
+      state: "",
+      zip: "",
+      website: "",
       holes: [],
     };
   }
 };
 
 const urls = [
-  'https://www.greenskeeper.org/hawaii/golf_courses/',
-  'https://www.greenskeeper.org/southern_california/golf_courses/',
-  'https://www.greenskeeper.org/central_california/golf_courses/',
-  'https://www.greenskeeper.org/northern_california/golf_courses/',
-  'https://www.greenskeeper.org/southern_nevada/golf_courses/',
-  'https://www.greenskeeper.org/arizona/golf_courses/',
-  'https://www.greenskeeper.org/colorado/golf_courses/',
-  'https://www.greenskeeper.org/new_mexico/golf_courses/',
-  'https://www.greenskeeper.org/oregon/golf_courses/',
-  'https://www.greenskeeper.org/texas/golf_courses/',
-  'https://www.greenskeeper.org/washington/golf_courses/',
-  'https://www.greenskeeper.org/south_florida/golf_courses/',
-  'https://www.greenskeeper.org/central_florida/golf_courses/',
-  'https://www.greenskeeper.org/north_florida/golf_courses/',
+  // 'https://www.greenskeeper.org/hawaii/golf_courses/',
+  "https://www.greenskeeper.org/southern_california/golf_courses/",
+  // 'https://www.greenskeeper.org/central_california/golf_courses/',
+  // 'https://www.greenskeeper.org/northern_california/golf_courses/',
+  // 'https://www.greenskeeper.org/southern_nevada/golf_courses/',
+  // 'https://www.greenskeeper.org/arizona/golf_courses/',
+  // 'https://www.greenskeeper.org/colorado/golf_courses/',
+  // 'https://www.greenskeeper.org/new_mexico/golf_courses/',
+  // 'https://www.greenskeeper.org/oregon/golf_courses/',
+  // 'https://www.greenskeeper.org/texas/golf_courses/',
+  // 'https://www.greenskeeper.org/washington/golf_courses/',
+  // 'https://www.greenskeeper.org/south_florida/golf_courses/',
+  // 'https://www.greenskeeper.org/central_florida/golf_courses/',
+  // 'https://www.greenskeeper.org/north_florida/golf_courses/',
 ];
 
 (async () => {
@@ -217,16 +217,16 @@ const urls = [
     allScoreCards = [...allScoreCards, ...scoreCards];
   }
 
-  console.log('allScoreCards.length', allScoreCards.length);
-  console.log('allScoreCards[0]', allScoreCards[0]);
-  console.log('allScoreCards[1]', allScoreCards[1]);
+  console.log("allScoreCards.length", allScoreCards.length);
+  console.log("allScoreCards[0]", allScoreCards[0]);
+  console.log("allScoreCards[1]", allScoreCards[1]);
 
   fs.promises
-    .writeFile(`data-${Date.now()}.json`, JSON.stringify(allScoreCards), 'utf8')
+    .writeFile(`data-${Date.now()}.json`, JSON.stringify(allScoreCards), "utf8")
     .then(() => {
-      console.log('File written successfully');
+      console.log("File written successfully");
     })
-    .catch((error) => console.log('Error while writing file', error));
+    .catch((error) => console.log("Error while writing file", error));
 
   await browser.close();
 })();
